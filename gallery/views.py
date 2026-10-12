@@ -7,7 +7,9 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
-
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
 from .forms import UserRegisterForm
 from .models import Profile, Photo, Like, Comment, Conversation, Message
 
@@ -262,8 +264,7 @@ def user_profile(request, username):
         'followers_count': target_profile.followers.count(),
         'following_count': target_profile.following.count(),
     })
-
-
+  
 # --- 12. FOLLOW MECHANIC ---
 @login_required
 def toggle_follow(request, username):
@@ -276,3 +277,19 @@ def toggle_follow(request, username):
         profile.following.add(user_to_follow.profile)
         action = "followed"
     return JsonResponse({'action': action, 'follower_count': user_to_follow.profile.followers.count()})
+
+
+def signup_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # Log the user in automatically after sign up
+            messages.success(request, f"Welcome to Clubb, {user.username}!")
+            return redirect('chat')  # Redirect to your chat page or home route
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = UserCreationForm()
+        
+    return render(request, 'signup.html', {'form': form})
