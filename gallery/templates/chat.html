@@ -1,0 +1,1269 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clubb | Messages, Forum & Communities</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ==========================================================================
+           RESET & CORE SETUP
+           ========================================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #07070b;
+            color: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            height: 100vh;
+            overflow: hidden; /* Lock window scrolling; content panes scroll independently */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* TOP NAVIGATION BAR */
+        .top-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 32px;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            height: 56px;
+            flex-shrink: 0;
+        }
+
+        .brand-logo a {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: -0.8px;
+        }
+
+        .brand-logo a span {
+            color: #ff5722;
+        }
+
+        /* WIDER & PREMIUM CENTER TAB NAVIGATION (FIXED AT TOP) */
+        .main-hub-tabs-nav {
+            display: flex;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 5px;
+            border-radius: 100px;
+            gap: 6px;
+            width: 100%;
+            max-width: 880px; /* Wider, elegant rectangular pill bar */
+            margin: 0 auto;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .hub-tab-btn {
+            flex: 1;
+            padding: 9px 16px;
+            border: none;
+            background: transparent;
+            color: #8a8d98;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .hub-tab-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            transition: transform 0.2s ease;
+        }
+
+        .hub-tab-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .hub-tab-btn.active {
+            background: linear-gradient(135deg, #ff5722 0%, #ff2a5f 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 20px rgba(255, 87, 34, 0.4);
+        }
+
+        .hub-tab-btn.active svg {
+            transform: scale(1.1);
+            fill: #ffffff;
+        }
+
+        /* MAIN WRAPPER CONTAINER */
+        .page-main-layout {
+            max-width: 1440px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 12px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: calc(100vh - 56px);
+            overflow: hidden;
+        }
+
+        .hub-tab-content {
+            background: rgba(15, 15, 22, 0.75);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .tab-pane {
+            display: none;
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-pane.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ==========================================================================
+           TAB 1: MESSAGES (Photo 1 Reference Layout - Add Contact removed, SVG Send)
+           ========================================================================== */
+        .messages-split-view {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .contacts-left-panel {
+            width: 310px;
+            background: rgba(11, 11, 16, 0.85);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            flex-shrink: 0;
+        }
+
+        .contacts-left-panel h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .contacts-scroll-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-right: 4px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .contact-item:hover, .contact-item.active {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .contact-info-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .contact-avatar-wrap {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .contact-avatar-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .contact-details h4 {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .contact-details p {
+            font-size: 11px;
+            color: #8a8d98;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 130px;
+        }
+
+        .contact-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            font-size: 10px;
+            color: #8a8d98;
+        }
+
+        /* Right Direct Chat Thread */
+        .chat-thread-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: rgba(14, 14, 20, 0.4);
+        }
+
+        .chat-thread-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .thread-user-details {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .thread-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-circle-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .action-circle-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .thread-messages-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .msg-bubble {
+            max-width: 65%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .msg-bubble.incoming {
+            background: rgba(255, 255, 255, 0.08);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-bubble.outgoing {
+            background: rgba(255, 255, 255, 0.16);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        /* Message Input Bar with Circular SVG Arrow Send Icon */
+        .chat-thread-input-bar {
+            padding: 12px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+            background: rgba(10, 10, 14, 0.85);
+        }
+
+        .input-pill {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            padding: 10px 18px;
+            color: #ffffff;
+            outline: none;
+            font-size: 13px;
+        }
+
+        .btn-svg-send {
+            background: #22c55e;
+            color: #ffffff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+            flex-shrink: 0;
+        }
+
+        .btn-svg-send:hover {
+            transform: scale(1.06);
+            background: #16a34a;
+        }
+
+        /* ==========================================================================
+           TAB 2: FRIENDS ACTIVITY (Stories at top + Pinned Friend Comment Highlight)
+           ========================================================================== */
+        .activity-feeds-view {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            padding: 16px;
+            gap: 20px;
+        }
+
+        .feeds-stream-column {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-right: 6px;
+        }
+
+        /* Top Friend Stories Carousel */
+        .friend-stories-bar {
+            display: flex;
+            gap: 14px;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            overflow-x: auto;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .story-circle-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            min-width: 60px;
+        }
+
+        .story-ring {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(135deg, #ff5722 0%, #ff2a5f 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .story-ring img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #0d0d12;
+        }
+
+        .story-circle-item span {
+            font-size: 11px;
+            color: #d0d0d8;
+        }
+
+        .feed-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .feed-author-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .feed-media-collage {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            border-radius: 12px;
+            overflow: hidden;
+            max-height: 320px;
+        }
+
+        .feed-media-collage img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Friend Comment Highlight Box (#1 Top Comment) */
+        .friend-highlight-comment-box {
+            background: rgba(255, 87, 34, 0.08);
+            border: 1px solid rgba(255, 87, 34, 0.3);
+            border-left: 4px solid #ff5722;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .friend-comment-badge {
+            font-size: 10px;
+            font-weight: 800;
+            color: #ff5722;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .feed-footer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #8a8d98;
+        }
+
+        .activity-right-sidebar {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .widget-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .widget-box h4 {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .request-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .btn-sm-accept {
+            background: #ff5722;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        /* ==========================================================================
+           TAB 3: WORLD CHAT FORUM (Single Unified View with Hashtag Search)
+           ========================================================================== */
+        .forum-unified-layout {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 16px;
+            gap: 14px;
+        }
+
+        .forum-top-search-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-shrink: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .forum-search-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            padding: 8px 16px;
+            width: 320px; /* Short compact search bar */
+        }
+
+        .forum-search-pill input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 12px;
+            width: 100%;
+        }
+
+        .forum-feed-scroll {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding-right: 4px;
+        }
+
+        .forum-post-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* ==========================================================================
+           TAB 4: COMMUNITIES & CLANS (Structured Sidebar: Favorites, Clans, Groups, Class)
+           ========================================================================== */
+        .communities-split-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .community-sidebar-left {
+            width: 280px;
+            background: rgba(11, 11, 16, 0.85);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .community-sidebar-section h5 {
+            font-size: 11px;
+            color: #8a8d98;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .community-icon-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .community-icon-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .comm-mini-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .comm-mini-avatar.class-icon {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .community-icon-item span {
+            font-size: 13px;
+            color: #e0e0e0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .community-main-feed {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .community-feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .filter-toggle-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .filter-toggle-btn.active {
+            background: #ff5722;
+            border-color: #ff5722;
+        }
+
+        /* FLOATING PROFILE DASHBOARD */
+        .bottom-controls-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .bottom-profile-icon-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 24px;
+            pointer-events: auto;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff5722 0%, #ff2a5f 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(255, 87, 34, 0.4);
+            z-index: 1001;
+        }
+
+        .profile-dashboard-panel {
+            position: fixed;
+            bottom: 74px;
+            left: 24px;
+            width: 280px;
+            background: rgba(15, 15, 20, 0.95);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(15px) scale(0.95);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .profile-dashboard-panel.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVBAR -->
+    <header class="top-navbar">
+        <div class="brand-logo">
+            <a href="{% url 'gallery' %}">Clubb<span>.</span></a>
+        </div>
+    </header>
+
+    <!-- MAIN HUB LAYOUT -->
+    <main class="page-main-layout">
+
+        <!-- WIDER PREMIUM TAB NAVIGATION (FIXED AT TOP WITH INLINE SVGs) -->
+        <nav class="main-hub-tabs-nav">
+            <button class="hub-tab-btn active" data-tab="tab-messages">
+                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+                Messages
+            </button>
+            <button class="hub-tab-btn" data-tab="tab-activity">
+                <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                Friends Activity
+            </button>
+            <button class="hub-tab-btn" data-tab="tab-forum">
+                <svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9 0c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm9 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45v2h6v-2c0-2.66-5.33-4-7-4z"/></svg>
+                World Chat Forum
+            </button>
+            <button class="hub-tab-btn" data-tab="tab-communities">
+                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                Communities & Clans
+            </button>
+        </nav>
+
+        <!-- MAIN TAB CONTENT PANES -->
+        <div class="hub-tab-content">
+            
+            <!-- ===================================================================
+                 TAB 1: MESSAGES (Add Contact Removed, SVG Send Arrow)
+                 =================================================================== -->
+            <div id="tab-messages" class="tab-pane active">
+                <div class="messages-split-view">
+                    
+                    <!-- Left Contacts Panel -->
+                    <aside class="contacts-left-panel">
+                        <h2>Messages</h2>
+                        
+                        <div class="contacts-scroll-list">
+                            <!-- Pinned Saved Messages -->
+                            <div class="contact-item active" onclick="switchChatUser('Saved Messages', 'Private Vault', 'https://via.placeholder.com/40')">
+                                <div class="contact-info-left">
+                                    <div class="contact-avatar-wrap" style="background: linear-gradient(135deg, #ff5722, #ff2a5f); display:flex; align-items:center; justify-content:center;">
+                                        <svg style="width:20px; height:20px; fill:#fff;" viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+                                    </div>
+                                    <div class="contact-details">
+                                        <h4>Saved Messages</h4>
+                                        <p>Personal notes & links</p>
+                                    </div>
+                                </div>
+                                <div class="contact-meta">
+                                    <span>Pinned</span>
+                                </div>
+                            </div>
+
+                            <!-- User Items -->
+                            <div class="contact-item" onclick="switchChatUser('Orosz Boldizsár', 'Active now', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150')">
+                                <div class="contact-info-left">
+                                    <div class="contact-avatar-wrap">
+                                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" alt="">
+                                    </div>
+                                    <div class="contact-details">
+                                        <h4>Orosz Boldizsár</h4>
+                                        <p>That's what I've heard...</p>
+                                    </div>
+                                </div>
+                                <div class="contact-meta">
+                                    <span>21:16</span>
+                                </div>
+                            </div>
+
+                            <div class="contact-item" onclick="switchChatUser('Nagy Tímea', '2h ago', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150')">
+                                <div class="contact-info-left">
+                                    <div class="contact-avatar-wrap">
+                                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="">
+                                    </div>
+                                    <div class="contact-details">
+                                        <h4>Nagy Tímea</h4>
+                                        <p>I'm not sure Could...</p>
+                                    </div>
+                                </div>
+                                <div class="contact-meta">
+                                    <span>12:16</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Contact Button Completely Removed as Requested -->
+                    </aside>
+
+                    <!-- Right Chat Workspace Panel -->
+                    <main class="chat-thread-panel">
+                        <div class="chat-thread-header">
+                            <div class="thread-user-details">
+                                <img id="chatHeaderAvatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                                <div>
+                                    <h4 id="chatHeaderName" style="font-size:14px;">Orosz Boldizsár</h4>
+                                    <p id="chatHeaderSub" style="font-size:11px; color:#8a8d98;">(217) 555-0133</p>
+                                </div>
+                            </div>
+
+                            <div class="thread-actions">
+                                <button class="action-circle-btn"><svg style="width:16px; height:16px; fill:#fff;" viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg></button>
+                                <button class="action-circle-btn"><svg style="width:16px; height:16px; fill:#fff;" viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></button>
+                                <button class="action-circle-btn"><svg style="width:16px; height:16px; fill:#fff;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></button>
+                            </div>
+                        </div>
+
+                        <!-- Chat Feed Area -->
+                        <div class="thread-messages-body" id="messagesBody">
+                            <div class="msg-bubble incoming">
+                                I'm cautious about crypto. It's unpredictable.
+                            </div>
+                            <div class="msg-bubble outgoing">
+                                Yeah, but the potential returns are high.
+                            </div>
+                            <div class="msg-bubble incoming">
+                                That's what I've heard. Any advice on where to start?
+                            </div>
+                            <div class="msg-bubble outgoing">
+                                Have you started investing in real estate?
+                            </div>
+                        </div>
+
+                        <!-- Fixed Chat Input Bar with Circular SVG Send Arrow Button -->
+                        <div class="chat-thread-input-bar">
+                            <input type="text" id="chatInputText" class="input-pill" placeholder="I mean have you |">
+                            <button class="btn-svg-send" onclick="sendDirectMsg()" title="Send Message">
+                                <svg style="width:18px; height:18px; fill:#fff; transform: rotate(-30deg) translateX(1px);" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                            </button>
+                        </div>
+                    </main>
+
+                </div>
+            </div>
+
+            <!-- ===================================================================
+                 TAB 2: FRIENDS ACTIVITY (Top Stories + Pinned Alicia Comment)
+                 =================================================================== -->
+            <div id="tab-activity" class="tab-pane">
+                <div class="activity-feeds-view">
+                    
+                    <!-- Main Feed Stream -->
+                    <div class="feeds-stream-column">
+                        
+                        <!-- Top Friend Stories / Status Bar -->
+                        <div class="friend-stories-bar">
+                            <div class="story-circle-item">
+                                <div class="story-ring">
+                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="">
+                                </div>
+                                <span>Gladys</span>
+                            </div>
+                            <div class="story-circle-item">
+                                <div class="story-ring">
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" alt="">
+                                </div>
+                                <span>Kristin</span>
+                            </div>
+                            <div class="story-circle-item">
+                                <div class="story-ring">
+                                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" alt="">
+                                </div>
+                                <span>Priscilla</span>
+                            </div>
+                        </div>
+
+                        <h3 style="font-size:15px; font-weight:700;">Feeds & Recent Activity</h3>
+                        
+                        <!-- Feed Item with Pinned Friend Comment (#1 Top Comment) -->
+                        <div class="feed-card">
+                            <div class="feed-author-header">
+                                <div class="author-info">
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" class="author-avatar">
+                                    <div>
+                                        <h4 style="font-size:13px;">Robert Fox</h4>
+                                        <p style="font-size:11px; color:#8a8d98;">@alessandroveronezi</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p style="font-size:13px; color:#e0e0e0;">
+                                While Corfu gives us the ability to shoot by the sea with amazing blue background full of light of the sky, Florina gives us its gentle side...
+                            </p>
+
+                            <!-- Photo Grid Collage -->
+                            <div class="feed-media-collage">
+                                <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400">
+                                <img src="https://images.unsplash.com/photo-1511884642898-4c92249e20b6?w=400">
+                            </div>
+
+                            <!-- Pinned Highlighted Friend Comment (#1 Comment) -->
+                            <div class="friend-highlight-comment-box">
+                                <div class="friend-comment-badge">
+                                    <svg style="width:12px; height:12px; fill:#ff5722;" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                    #1 Friend Comment
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" style="width:24px; height:24px; border-radius:50%;">
+                                    <strong style="font-size:12px; color:#fff;">Alicia Key</strong>
+                                </div>
+                                <p style="font-size:12px; color:#f1f1f5; padding-left:32px;">
+                                    "The landscape lighting in frame 2 is incredible! Absolutely stunning capture! 🔥"
+                                </p>
+                            </div>
+
+                            <div class="feed-footer-actions">
+                                <div style="display:flex; gap:16px;">
+                                    <span>❤️ 1.6k</span>
+                                    <span>💬 2.3k</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Requests & Suggestions -->
+                    <aside class="activity-right-sidebar">
+                        <div class="widget-box">
+                            <h4>Requests <span style="background:rgba(255,87,34,0.2); color:#ff5722; font-size:10px; padding:2px 6px; border-radius:100px;">2</span></h4>
+                            <div class="request-item">
+                                <div>
+                                    <strong>Lauralee Quintero</strong>
+                                    <p style="color:#8a8d98; font-size:10px;">wants to add you</p>
+                                </div>
+                                <button class="btn-sm-accept">Accept</button>
+                            </div>
+                        </div>
+
+                        <div class="widget-box">
+                            <h4>Suggestions for you</h4>
+                            <div class="request-item">
+                                <strong>Chantal Shelburne</strong>
+                                <span style="color:#ff5722; cursor:pointer; font-weight:bold;">+ Add</span>
+                            </div>
+                        </div>
+                    </aside>
+
+                </div>
+            </div>
+
+            <!-- ===================================================================
+                 TAB 3: WORLD CHAT FORUM (Single Unified View with Hashtag Search)
+                 =================================================================== -->
+            <div id="tab-forum" class="tab-pane">
+                <div class="forum-unified-layout">
+                    
+                    <!-- Forum Header with Compact Hashtag/Keyword Search Bar -->
+                    <div class="forum-top-search-header">
+                        <h3 style="font-size:15px; font-weight:700;">World Chat Broadcast Forum</h3>
+                        
+                        <div class="forum-search-pill">
+                            <svg style="width:16px; height:16px; fill:#8a8d98;" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                            <input type="text" id="forumSearchInput" placeholder="Filter by #hashtag or keyword..." oninput="filterForumPosts(this.value)">
+                        </div>
+                    </div>
+
+                    <!-- Single Main Scrollable Stream -->
+                    <div class="forum-feed-scroll" id="forumFeedScroll">
+                        <div class="forum-post-card">
+                            <div style="display:flex; align-items:center; justify-content:space-between;">
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" style="width:32px; height:32px; border-radius:50%;">
+                                    <strong>Diana T.</strong>
+                                    <span style="font-size:11px; color:#8a8d98;">2d ago</span>
+                                </div>
+                                <span style="font-size:11px; color:#ff5722; font-weight:600;">#uikit #design</span>
+                            </div>
+                            <p style="font-size:13px; color:#e0e0e0;">
+                                I have already prepared all styles and components according to our standards during the design phase!
+                            </p>
+                        </div>
+
+                        <div class="forum-post-card">
+                            <div style="display:flex; align-items:center; justify-content:space-between;">
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" style="width:32px; height:32px; border-radius:50%;">
+                                    <strong>Daniel A.</strong>
+                                    <span style="font-size:11px; color:#8a8d98;">3h ago</span>
+                                </div>
+                                <span style="font-size:11px; color:#ff5722; font-weight:600;">#frontend</span>
+                            </div>
+                            <p style="font-size:13px; color:#e0e0e0;">
+                                Okay, keep me updated @Diana T. I also wanted to remind you to keep the layers organized.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Forum Broadcast Input -->
+                    <div class="chat-thread-input-bar">
+                        <input type="text" id="forumInputText" class="input-pill" placeholder="Broadcast to World Chat (#hashtag)...">
+                        <button class="btn-svg-send" onclick="sendForumBroadcast()">
+                            <svg style="width:18px; height:18px; fill:#fff; transform: rotate(-30deg) translateX(1px);" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ===================================================================
+                 TAB 4: COMMUNITIES & CLANS (Structured Hierarchy Sidebar)
+                 =================================================================== -->
+            <div id="tab-communities" class="tab-pane">
+                <div class="communities-split-layout">
+                    
+                    <!-- Left Sidebar: Favorites, Clans, Groups, Class -->
+                    <aside class="community-sidebar-left">
+                        
+                        <!-- 1. Favorites -->
+                        <div class="community-sidebar-section">
+                            <h5>Favorites</h5>
+                            <div class="community-icon-item">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" class="comm-mini-avatar">
+                                <span>Cameron Williamson</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. Clans (Join by Request) -->
+                        <div class="community-sidebar-section">
+                            <h5>Clans</h5>
+                            <div class="community-icon-item">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="comm-mini-avatar">
+                                <span>Savannah's Clan</span>
+                            </div>
+                            <div class="community-icon-item">
+                                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="comm-mini-avatar">
+                                <span>Esther Tech Clan</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. Groups (Public Searchable Channels) -->
+                        <div class="community-sidebar-section">
+                            <h5>Groups</h5>
+                            <div class="community-icon-item">
+                                <div class="comm-mini-avatar class-icon" style="background:#ff5722;">#</div>
+                                <span>Afrobeats Producers</span>
+                            </div>
+                            <div class="community-icon-item">
+                                <div class="comm-mini-avatar class-icon" style="background:#0ea5e9;">#</div>
+                                <span>3D Render Showcase</span>
+                            </div>
+                        </div>
+
+                        <!-- 4. Class (Strictly Private Group Chats) -->
+                        <div class="community-sidebar-section">
+                            <h5>Class (Private)</h5>
+                            <div class="community-icon-item">
+                                <div class="comm-mini-avatar class-icon">🔒</div>
+                                <span>Level 400 IT Core</span>
+                            </div>
+                        </div>
+
+                    </aside>
+
+                    <!-- Right Main Community Feed -->
+                    <main class="community-main-feed">
+                        <div class="community-feed-header">
+                            <h3 style="font-size:15px; font-weight:700;">Community Feed</h3>
+                            <div style="display:flex; gap:8px;">
+                                <button class="filter-toggle-btn active">Favorites</button>
+                                <button class="filter-toggle-btn">Popular</button>
+                            </div>
+                        </div>
+
+                        <div class="feed-card">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" style="width:36px; height:36px; border-radius:50%;">
+                                <div>
+                                    <strong>Makise Kurisu</strong>
+                                    <p style="font-size:11px; color:#8a8d98;">Posted in Savannah's Clan • 3m ago</p>
+                                </div>
+                            </div>
+                            <p style="font-size:13px;">Just done a quick HIIT session with my gang! Don't forget to hydrate, Y'all!</p>
+                            <img src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600" style="width:100%; border-radius:12px; max-height:260px; object-fit:cover;">
+                        </div>
+                    </main>
+
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FLOATING BOTTOM PROFILE DASHBOARD -->
+    <div class="bottom-controls-container">
+        <button class="bottom-profile-icon-btn" id="dashToggleBtn">
+            <span>{% if request.user.is_authenticated %}{{ request.user.username|first|upper }}{% else %}K{% endif %}</span>
+        </button>
+    </div>
+
+    <div class="profile-dashboard-panel" id="profileDashboard">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:36px; height:36px; border-radius:50%; background:#ff5722; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                {% if request.user.is_authenticated %}{{ request.user.username|first|upper }}{% else %}G{% endif %}
+            </div>
+            <div>
+                <h4 style="font-size:13px;">{% if request.user.is_authenticated %}{{ request.user.username }}{% else %}Guest User{% endif %}</h4>
+                <p style="font-size:11px; color:#8a8d98;">Clubb Member</p>
+            </div>
+        </div>
+        <hr style="border:none; border-top:1px solid rgba(255,255,255,0.08);">
+        <a href="{% url 'profile' username=request.user.username|default:'user' %}" style="color:#fff; text-decoration:none; font-size:12px;">
+            View Profile
+        </a>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Fixed Top Hub Tab Switching
+            const tabBtns = document.querySelectorAll('.main-hub-tabs-nav .hub-tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabPanes.forEach(p => p.classList.remove('active'));
+
+                    btn.classList.add('active');
+                    const targetId = btn.getAttribute('data-tab');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+
+            // 2. Profile Dashboard Toggle
+            const dashBtn = document.getElementById('dashToggleBtn');
+            const dashboard = document.getElementById('profileDashboard');
+
+            dashBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dashboard.classList.toggle('active');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (dashboard && !dashboard.contains(e.target) && e.target !== dashBtn) {
+                    dashboard.classList.remove('active');
+                }
+            });
+        });
+
+        // Switch Active Chat Contact (Tab 1)
+        function switchChatUser(name, sub, avatar) {
+            document.getElementById('chatHeaderName').textContent = name;
+            document.getElementById('chatHeaderSub').textContent = sub;
+            document.getElementById('chatHeaderAvatar').src = avatar;
+        }
+
+        // Send Direct Message (Tab 1)
+        function sendDirectMsg() {
+            const input = document.getElementById('chatInputText');
+            const body = document.getElementById('messagesBody');
+            if (!input.value.trim()) return;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble outgoing';
+            bubble.textContent = input.value;
+            body.appendChild(bubble);
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+        }
+
+        // Filter Forum Posts by Hashtag/Keyword (Tab 3)
+        function filterForumPosts(query) {
+            const posts = document.querySelectorAll('#forumFeedScroll .forum-post-card');
+            posts.forEach(post => {
+                const text = post.textContent.toLowerCase();
+                post.style.display = text.includes(query.toLowerCase()) ? 'flex' : 'none';
+            });
+        }
+
+        // Send Forum Broadcast (Tab 3)
+        function sendForumBroadcast() {
+            const input = document.getElementById('forumInputText');
+            const feed = document.getElementById('forumFeedScroll');
+            if (!input.value.trim()) return;
+
+            const card = document.createElement('div');
+            card.className = 'forum-post-card';
+            card.innerHTML = `
+                <div style="display:flex; align-items:center; justify-space-between;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:32px; height:32px; border-radius:50%; background:#ff5722; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px;">You</div>
+                        <strong>@You</strong>
+                        <span style="font-size:11px; color:#8a8d98;">Just now</span>
+                    </div>
+                </div>
+                <p style="font-size:13px; color:#e0e0e0;">${escapeHtml(input.value)}</p>
+            `;
+            feed.appendChild(card);
+            input.value = '';
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>

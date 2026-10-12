@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clubb | Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #050505; color: white; font-family: 'Inter', sans-serif;
+            display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;
+        }
+        .login-box {
+            background: #111; padding: 40px; border-radius: 12px; border: 1px solid #222;
+            width: 100%; max-width: 360px; text-align: center;
+        }
+        h2 { margin-top: 0; margin-bottom: 24px; font-style: italic; letter-spacing: -0.5px; }
+        input {
+            width: 100%; padding: 12px; margin-bottom: 16px; border-radius: 6px;
+            background: #1a1a1a; border: 1px solid #333; color: white; box-sizing: border-box;
+        }
+        button {
+            width: 100%; padding: 12px; background: white; color: black; border: none;
+            border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>Clubb</h2>
+        
+        {% if form.errors %}
+            <p style="color: #ff3366; font-size: 13px; margin-bottom: 16px;">Invalid username or password.</p>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required autofocus>
+            <input type="password" name="password" placeholder="Password" required>
+            
+            <!-- Hidden input to redirect the user back to the page they were trying to access -->
+            <input type="hidden" name="next" value="{{ next }}">
+            
+            <button type="submit">Log In</button>
+        </form>
+    </div>
+</body>
+</html>

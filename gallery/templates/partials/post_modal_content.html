@@ -1,0 +1,107 @@
+<div class="modal-content-wrapper" style="display: flex; height: 80vh; max-width: 1000px; width: 90%; background: #111; border-radius: 12px; overflow: hidden; border: 1px solid #222;">
+   <!-- Left Side: Media Viewer -->
+    <div style="flex: 1.5; background: #050505; display: flex; align-items: center; justify-content: center; border-right: 1px solid #222; position: relative;">
+        {% if photo.video %}
+            <!-- Video Element -->
+            <video id="modal-vid" src="{{ photo.video.url }}" autoplay style="max-width: 100%; max-height: 100%; object-fit: contain; cursor: pointer;"></video>
+            
+            <!-- Custom Controller Overlay -->
+            <div style="position: absolute; bottom: 30px; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 12px 24px; border-radius: 40px; display: flex; gap: 24px; align-items: center; border: 1px solid rgba(255,255,255,0.1);">
+                
+                <!-- Rewind 10s -->
+                <button onclick="document.getElementById('modal-vid').currentTime -= 10" style="background: none; border: none; color: white; cursor: pointer; display: flex;">
+                    <span class="material-symbols-outlined">replay_10</span>
+                </button>
+                
+                <!-- Play / Pause -->
+                <button onclick="toggleModalVideo()" id="play-btn" style="background: white; border: none; color: black; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <span class="material-symbols-rounded">pause</span>
+                </button>
+                
+                <!-- Forward 10s -->
+                <button onclick="document.getElementById('modal-vid').currentTime += 10" style="background: none; border: none; color: white; cursor: pointer; display: flex;">
+                    <span class="material-symbols-outlined">forward_10</span>
+                </button>
+                
+                <!-- Speed Toggle -->
+                <button onclick="toggleSpeed()" id="speed-btn" style="background: none; border: none; color: white; cursor: pointer; font-weight: 700; font-size: 14px; min-width: 30px;">
+                    1x
+                </button>
+            </div>
+
+            <!-- Controller Logic -->
+            <script>
+                const video = document.getElementById('modal-vid');
+                const playBtn = document.getElementById('play-btn');
+                const speedBtn = document.getElementById('speed-btn');
+                
+                // Clicking the video itself plays/pauses
+                video.addEventListener('click', toggleModalVideo);
+                
+                function toggleModalVideo() {
+                    if (video.paused) {
+                        video.play();
+                        playBtn.innerHTML = '<span class="material-symbols-rounded">pause</span>';
+                    } else {
+                        video.pause();
+                        playBtn.innerHTML = '<span class="material-symbols-rounded">play_arrow</span>';
+                    }
+                }
+
+                function toggleSpeed() {
+                    const currentSpeed = video.playbackRate;
+                    let newSpeed = 1;
+                    if (currentSpeed === 1) newSpeed = 1.5;
+                    else if (currentSpeed === 1.5) newSpeed = 2;
+                    
+                    video.playbackRate = newSpeed;
+                    speedBtn.innerText = newSpeed + 'x';
+                }
+            </script>
+        {% else %}
+            <!-- Standard Image Fallback -->
+            <img src="{{ photo.image.url }}" alt="{{ photo.title }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+        {% endif %}
+    </div>
+
+    <!-- Right: Details & Comments Pane -->
+    <div style="flex: 0.8; display: flex; flex-direction: column; background: #111; border-left: 1px solid #222;">
+        
+        <!-- Header -->
+        <div style="padding: 16px; border-bottom: 1px solid #222; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                {{ photo.uploader.username|slice:":1"|upper }}
+            </div>
+            <div>
+                <a href="{% url 'user_profile' photo.uploader.username %}" style="color: white; font-weight: 600; text-decoration: none; font-size: 14px;">@{{ photo.uploader.username }}</a>
+                <p style="color: #737373; font-size: 12px;">{{ photo.title }}</p>
+            </div>
+        </div>
+
+        <!-- Comments Feed -->
+        <div id="modal-comments-list" style="flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+            {% for comment in photo.comments.all %}
+            <div style="display: flex; gap: 10px; font-size: 13px;">
+                <strong style="color: #fff;">@{{ comment.author.username }}:</strong>
+                <span style="color: #ccc;">{{ comment.content }}</span>
+            </div>
+            {% empty %}
+            <p id="no-comments-msg" style="color: #555; text-align: center; margin-auto: 0; font-size: 13px;">No comments yet. Be the first to start the thread!</p>
+            {% endfor %}
+        </div>
+
+        <!-- Action Bar & Input -->
+        <div style="padding: 16px; border-top: 1px solid #222;">
+            <div style="display: flex; gap: 16px; margin-bottom: 12px; color: #888; font-size: 13px;">
+                <span>❤️ {{ photo.liked_by.count }} likes</span>
+                <span>👁️ {{ photo.views }} views</span>
+            </div>
+            
+            <form id="comment-form" onsubmit="submitComment(event, {{ photo.id }})" style="display: flex; gap: 8px;">
+                <input type="text" id="comment-input" placeholder="Add a comment..." required style="flex: 1; background: #000; border: 1px solid #333; color: white; padding: 10px 12px; border-radius: 6px; font-size: 13px; outline: none;">
+                <button type="submit" style="background: white; color: black; border: none; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px;">Post</button>
+            </form>
+        </div>
+
+    </div>
+</div>

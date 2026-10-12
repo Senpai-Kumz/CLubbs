@@ -1,0 +1,453 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clubb | @{{ target_user.username }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+    
+    <style>
+        :root {
+            --bg-body: #030303;
+            --surface-solid: #0a0a0c;
+            --surface-glass: rgba(15, 15, 18, 0.6);
+            --border-light: rgba(255, 255, 255, 0.06);
+            --border-highlight: rgba(255, 255, 255, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #8a8d98;
+            --text-tertiary: #5a5d68;
+            
+            --accent-glow: rgba(255, 87, 34, 0.4);
+            --accent-gradient: linear-gradient(135deg, #ff5722 0%, #ff2a5f 100%);
+            --text-gradient: linear-gradient(to right, #ffffff, #a1a1aa);
+            
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body { 
+            background-color: var(--bg-body); color: var(--text-primary); 
+            min-height: 100vh; -webkit-font-smoothing: antialiased;
+            position: relative; overflow-x: hidden;
+        }
+
+        /* Ambient Background Orbs */
+        body::before, body::after {
+            content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            filter: blur(120px); opacity: 0.35;
+        }
+        body::before { background: radial-gradient(circle at 15% 30%, rgba(255, 87, 34, 0.2), transparent 40%); }
+        body::after { background: radial-gradient(circle at 85% 70%, rgba(255, 42, 95, 0.2), transparent 40%); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .layout-wrapper {
+            max-width: 1500px; margin: 0 auto; padding: 40px;
+            display: flex; gap: 48px; align-items: flex-start;
+            animation: fadeUp 0.8s var(--ease-out-expo) forwards;
+        }
+
+        /* -------------------------------------------
+           CUSTOM TOOLTIPS
+           ------------------------------------------- */
+        [data-tooltip] { position: relative; }
+        [data-tooltip]::before {
+            content: attr(data-tooltip); position: absolute; bottom: 130%; left: 50%; 
+            transform: translateX(-50%) scale(0.9); padding: 6px 12px;
+            background: var(--text-primary); color: var(--bg-body); font-size: 11px;
+            border-radius: 8px; font-weight: 600; opacity: 0; pointer-events: none; 
+            transition: all 0.2s var(--ease-out-expo); white-space: nowrap; z-index: 100;
+            box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+        }
+        [data-tooltip]::after {
+            content: ''; position: absolute; bottom: 110%; left: 50%;
+            transform: translateX(-50%); border-width: 5px; border-style: solid;
+            border-color: var(--text-primary) transparent transparent transparent;
+            opacity: 0; transition: all 0.2s var(--ease-out-expo); pointer-events: none;
+        }
+        [data-tooltip]:hover::before, [data-tooltip]:hover::after { 
+            opacity: 1; transform: translateX(-50%) scale(1); 
+        }
+
+        /* -------------------------------------------
+           LEFT SIDEBAR: Profile Card
+           ------------------------------------------- */
+        .profile-sidebar {
+            width: 380px; flex-shrink: 0; background: var(--surface-glass);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light); border-radius: 32px;
+            position: sticky; top: 40px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+            overflow: hidden;
+        }
+
+        .cover-photo {
+            height: 180px; width: 100%;
+            background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop') center/cover;
+            position: relative;
+        }
+        .cover-photo::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(to bottom, transparent 0%, var(--surface-solid) 100%);
+        }
+        
+        .cover-tools {
+            position: absolute; top: 20px; left: 20px; right: 20px;
+            display: flex; justify-content: space-between; z-index: 10;
+        }
+        .tool-btn {
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(12px); padding: 8px; border-radius: 50%; 
+            color: white; display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s;
+        }
+        .tool-btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.05); }
+
+        .sidebar-content { padding: 0 32px 32px 32px; position: relative; z-index: 2; }
+
+        .avatar-wrapper {
+            width: 112px; height: 112px; border-radius: 50%; padding: 4px; 
+            background: var(--surface-solid); margin-top: -56px; position: relative; z-index: 2;
+        }
+        .avatar-inner { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: var(--text-tertiary); }
+        .avatar-inner img { width: 100%; height: 100%; object-fit: cover; }
+        .status-dot {
+            position: absolute; bottom: 8px; right: 8px; width: 16px; height: 16px;
+            background: #10b981; border: 3px solid var(--surface-solid);
+            border-radius: 50%; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
+        .user-identity { margin-top: 16px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 4px; }
+        .user-identity-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .user-identity h1 { 
+            font-size: 26px; font-weight: 800; letter-spacing: -0.03em; 
+            display: flex; align-items: center; gap: 8px;
+            background: var(--text-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .pro-badge {
+            background: rgba(255,255,255,0.1); border: 1px solid var(--border-highlight);
+            padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase; color: white;
+        }
+        .user-identity p { color: var(--text-secondary); font-size: 15px; font-weight: 400; }
+        
+        .verified-badge { 
+            color: #fff; background: var(--accent-gradient); border-radius: 50%; font-size: 14px; padding: 3px;
+            font-variation-settings: 'FILL' 1; box-shadow: 0 0 16px var(--accent-glow); -webkit-text-fill-color: white;
+        }
+
+        .bio-text { font-size: 14px; font-weight: 300; line-height: 1.6; color: #d4d4d8; margin-bottom: 24px; }
+
+        .social-links { display: flex; gap: 12px; margin-bottom: 24px; }
+        .social-btn {
+            width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.03); 
+            border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center;
+            color: var(--text-secondary); text-decoration: none; transition: all 0.2s;
+        }
+        .social-btn:hover { background: rgba(255,255,255,0.1); color: white; transform: translateY(-2px); }
+
+        .action-buttons { display: flex; gap: 12px; margin-bottom: 32px; }
+        .btn {
+            flex: 1; padding: 14px 0; border-radius: 16px; font-weight: 600; font-size: 14px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            cursor: pointer; transition: all 0.3s var(--ease-spring); border: none;
+        }
+        .btn-primary { background: var(--text-primary); color: var(--bg-body); }
+        .btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 24px rgba(255,255,255,0.2); }
+        .btn-secondary { background: rgba(255,255,255,0.04); color: var(--text-primary); border: 1px solid var(--border-light); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px) scale(1.02); }
+
+        .sidebar-stats { display: flex; justify-content: space-between; padding-top: 24px; border-top: 1px solid var(--border-light); }
+        .stat-col { display: flex; flex-direction: column; gap: 4px; cursor: pointer; transition: opacity 0.2s; }
+        .stat-col:hover { opacity: 0.7; }
+        .stat-col strong { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+        .stat-col span { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; }
+
+        /* -------------------------------------------
+           MAIN CONTENT AREA
+           ------------------------------------------- */
+        .main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 32px; }
+
+        .analytics-panel {
+            background: var(--surface-glass); backdrop-filter: blur(40px); border: 1px solid var(--border-light); border-radius: 24px;
+            padding: 24px 32px; display: flex; align-items: center; justify-content: space-between;
+            position: relative; overflow: hidden; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .analytics-panel::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 20% 50%, var(--accent-glow), transparent 40%);
+            pointer-events: none; opacity: 0.4;
+        }
+        
+        .analytic-item { display: flex; flex-direction: column; gap: 6px; position: relative; z-index: 1; }
+        .analytic-value { font-size: 32px; font-weight: 700; letter-spacing: -0.04em; color: #fff; }
+        .analytic-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .indicator { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 12px currentColor; }
+        .indicator.orange { color: #ff5722; background: #ff5722; }
+        .indicator.pink { color: #ff2a5f; background: #ff2a5f; }
+        .indicator.blue { color: #3b82f6; background: #3b82f6; }
+
+        /* Highlights */
+        .highlights-strip { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 8px; }
+        .highlight-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; flex-shrink: 0; transition: transform 0.2s var(--ease-spring); }
+        .highlight-item:hover { transform: scale(1.05); }
+        .highlight-ring { width: 68px; height: 68px; border-radius: 50%; padding: 3px; background: var(--accent-gradient); }
+        .highlight-inner { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--bg-body); background: var(--surface-solid); overflow: hidden; }
+        .highlight-inner img { width: 100%; height: 100%; object-fit: cover; }
+        .highlight-item span { font-size: 12px; font-weight: 500; letter-spacing: 0.02em; }
+
+        /* Toolbar & Filters */
+        .feed-toolbar { border-bottom: 1px solid var(--border-light); padding-bottom: 0; }
+        .toolbar-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+        
+        .feed-tabs { display: flex; gap: 32px; padding-left: 8px; }
+        .tab { font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; position: relative; transition: color 0.3s ease; text-transform: uppercase; letter-spacing: 0.05em; display: flex; gap: 8px; align-items: center; padding-bottom: 20px; }
+        .tab:hover { color: var(--text-primary); }
+        .tab.active { color: var(--text-primary); font-weight: 600; }
+        .tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--text-primary); border-radius: 2px 2px 0 0; box-shadow: 0 -2px 10px rgba(255,255,255,0.4); }
+        .tab-badge { background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 100px; font-size: 11px; }
+
+        .view-toggles { display: flex; gap: 8px; background: var(--surface-glass); padding: 4px; border-radius: 12px; border: 1px solid var(--border-light); margin-bottom: 16px; }
+        .view-btn { background: transparent; border: none; color: var(--text-secondary); padding: 6px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .view-btn.active { background: rgba(255,255,255,0.1); color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+
+        /* Category Filter Pills */
+        .feed-filters { display: flex; gap: 12px; padding: 16px 0; overflow-x: auto; scrollbar-width: none; }
+        .feed-filters::-webkit-scrollbar { display: none; }
+        .filter-pill { 
+            padding: 8px 16px; border-radius: 100px; background: rgba(255,255,255,0.03); 
+            border: 1px solid var(--border-light); color: var(--text-secondary); 
+            font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; 
+        }
+        .filter-pill:hover { background: rgba(255,255,255,0.08); color: white; border-color: var(--border-highlight); }
+        .filter-pill.active { background: white; color: black; border-color: white; box-shadow: 0 2px 10px rgba(255,255,255,0.2); }
+
+        /* Masonry Grid */
+        .masonry-grid { column-count: 3; column-gap: 24px; }
+        .photo-card {
+            break-inside: avoid; margin-bottom: 24px; position: relative; border-radius: 20px; overflow: hidden; cursor: pointer;
+            background: var(--surface-solid); box-shadow: inset 0 0 0 1px var(--border-light);
+            transition: transform 0.4s var(--ease-out-expo), box-shadow 0.4s var(--ease-out-expo);
+        }
+        .photo-card::after {
+            content: ''; position: absolute; inset: 0; border: 1px solid transparent; border-radius: 20px;
+            transition: border-color 0.4s var(--ease-out-expo), opacity 0.4s; pointer-events: none;
+            background: radial-gradient(circle at 50% 50%, transparent 50%, rgba(0,0,0,0.5) 100%); opacity: 0;
+        }
+        .photo-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05); }
+        .photo-card:hover::after { border-color: rgba(255,255,255,0.2); opacity: 1; }
+
+        .photo-card img, .photo-card video { width: 100%; display: block; object-fit: cover; transition: transform 0.8s var(--ease-out-expo); }
+        .photo-card:hover img, .photo-card:hover video { transform: scale(1.04); }
+
+        /* Card Context Menu & Badges */
+        .card-options {
+            position: absolute; top: 16px; left: 16px; width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;
+            color: white; border: 1px solid rgba(255,255,255,0.15); z-index: 2; opacity: 0; transition: all 0.2s;
+        }
+        .photo-card:hover .card-options { opacity: 1; }
+        .card-options:hover { background: rgba(255,255,255,0.2); }
+
+        .media-badge {
+            position: absolute; top: 16px; right: 16px; padding: 6px 10px; border-radius: 100px;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; gap: 4px;
+            color: white; border: 1px solid rgba(255,255,255,0.15); z-index: 2; font-size: 12px; font-weight: 600;
+        }
+        .media-badge .material-symbols-outlined { font-size: 16px; }
+
+        .card-footer {
+            position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 20px 20px 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+            display: flex; justify-content: space-between; align-items: flex-end;
+            opacity: 0; transform: translateY(15px); transition: all 0.4s var(--ease-out-expo); z-index: 3;
+        }
+        .photo-card:hover .card-footer { opacity: 1; transform: translateY(0); }
+        .card-title { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .card-stats { display: flex; gap: 12px; }
+        .stat-pill { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; }
+        .stat-pill .material-symbols-outlined { font-size: 16px; font-variation-settings: 'wght' 400; }
+
+        /* -------------------------------------------
+           MOBILE APP NAVIGATION BAR
+           ------------------------------------------- */
+        .mobile-nav {
+            display: none; position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(10, 10, 12, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid var(--border-light); padding: 12px 32px calc(12px + env(safe-area-inset-bottom));
+            justify-content: space-between; z-index: 900;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .nav-item.active { color: white; }
+        .nav-item span:last-child { font-size: 10px; font-weight: 600; }
+
+        @media (max-width: 1024px) {
+            .layout-wrapper { flex-direction: column; padding: 20px; gap: 32px; }
+            .profile-sidebar { width: 100%; position: static; }
+            .masonry-grid { column-count: 2; }
+        }
+        @media (max-width: 768px) {
+            .masonry-grid { column-count: 1; }
+            .analytics-panel { flex-wrap: wrap; gap: 24px; padding: 20px; }
+            /* Reveal Mobile Nav, pad bottom so content isn't hidden */
+            .mobile-nav { display: flex; }
+            .layout-wrapper { padding-bottom: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="layout-wrapper">
+        
+        <!-- Sidebar Profile -->
+        <aside class="profile-sidebar">
+            <div class="cover-photo">
+                <div class="cover-tools">
+                    <a href="{% url 'gallery' %}" class="tool-btn" data-tooltip="Back to Explore"><span class="material-symbols-outlined" style="font-size: 20px;">arrow_back</span></a>
+                    <button class="tool-btn" data-tooltip="Share Profile"><span class="material-symbols-outlined" style="font-size: 20px;">ios_share</span></button>
+                </div>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="avatar-wrapper">
+                    <div class="avatar-inner">
+                        {% if target_user.profile.avatar %}
+                            <img src="{{ target_user.profile.avatar.url }}" alt="{{ target_user.username }}">
+                        {% else %}
+                            <div style="font-size: 32px; font-weight: 600; background: var(--accent-gradient); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">{{ target_user.username|make_list|first|upper }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="status-dot" data-tooltip="Online Now"></div>
+                </div>
+
+                <div class="user-identity">
+                    <div class="user-identity-header">
+                        <h1>{{ target_user.first_name|default:target_user.username }} <span class="material-symbols-outlined verified-badge" data-tooltip="Verified Creator">check</span></h1>
+                        <div class="pro-badge" data-tooltip="Top 1% Contributor">PRO</div>
+                    </div>
+                    <p>@{{ target_user.username }}</p>
+                </div>
+
+                <p class="bio-text">{{ target_user.profile.bio|default:"Creative director & visual artist based in the digital realm. Exploring light, shadow, and architecture." }}</p>
+
+                <div class="social-links">
+                    <a href="#" class="social-btn" data-tooltip="Portfolio"><span class="material-symbols-outlined" style="font-size: 18px;">language</span></a>
+                    <a href="#" class="social-btn" data-tooltip="Instagram"><span class="material-symbols-outlined" style="font-size: 18px;">photo_camera</span></a>
+                    <a href="#" class="social-btn" data-tooltip="Twitter"><span class="material-symbols-outlined" style="font-size: 18px;">alternate_email</span></a>
+                </div>
+
+                <div class="action-buttons">
+                    {% if request.user != target_user and request.user.is_authenticated %}
+                        <button onclick="toggleFollow('{{ target_user.username }}')" class="btn btn-primary" id="follow-btn">
+                            <span id="btn-text">Follow</span>
+                        </button>
+                    {% endif %}
+                    <button class="btn btn-secondary">Message</button>
+                </div>
+
+                <div class="sidebar-stats">
+                    <div class="stat-col"><strong>{{ photos.count }}</strong><span>Visuals</span></div>
+                    <div class="stat-col"><strong id="follower-count">{{ target_user.profile.followers.count }}</strong><span>Followers</span></div>
+                    <div class="stat-col"><strong>{{ target_user.profile.following.count }}</strong><span>Following</span></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <div class="analytics-panel">
+                <div class="analytic-item"><div class="analytic-label"><div class="indicator orange"></div> Reach</div><div class="analytic-value">{{ photos.count|add:1240 }}</div></div>
+                <div class="analytic-item"><div class="analytic-label"><div class="indicator pink"></div> Views</div><div class="analytic-value">8.4k</div></div>
+                <div class="analytic-item"><div class="analytic-label"><div class="indicator blue"></div> Engaged</div><div class="analytic-value">14.2%</div></div>
+                <button class="btn btn-secondary" style="width: auto; padding: 0 24px; border-radius: 100px;">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">trending_up</span> Insights
+                </button>
+            </div>
+
+            <!-- Highlights -->
+            <div class="highlights-strip">
+                <div class="highlight-item"><div class="highlight-ring"><div class="highlight-inner"><img src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=200&auto=format&fit=crop" alt="Portraits"></div></div><span>Portraits</span></div>
+                <div class="highlight-item"><div class="highlight-ring" style="background: var(--border-highlight);"><div class="highlight-inner"><img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=200&auto=format&fit=crop" alt="Urban"></div></div><span style="color: var(--text-secondary);">Urban</span></div>
+                <div class="highlight-item"><div class="highlight-ring" style="background: var(--border-highlight);"><div class="highlight-inner"><img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=200&auto=format&fit=crop" alt="Studio"></div></div><span style="color: var(--text-secondary);">Studio</span></div>
+            </div>
+
+            <!-- Toolbar & Filtering -->
+            <div class="feed-toolbar">
+                <div class="toolbar-top">
+                    <div class="feed-tabs">
+                        <div class="tab active">Gallery <span class="tab-badge">{{ photos.count }}</span></div>
+                        <div class="tab">Collections <span class="tab-badge">3</span></div>
+                        <div class="tab">Featured</div>
+                    </div>
+                    <div class="view-toggles">
+                        <button class="view-btn active" data-tooltip="Masonry"><span class="material-symbols-outlined">dashboard</span></button>
+                        <button class="view-btn" data-tooltip="Grid"><span class="material-symbols-outlined">grid_on</span></button>
+                    </div>
+                </div>
+                
+                <div class="feed-filters">
+                    <button class="filter-pill active">All Work</button>
+                    <button class="filter-pill">Cinematic</button>
+                    <button class="filter-pill">Portraits</button>
+                    <button class="filter-pill">3D Render</button>
+                    <button class="filter-pill">Motion</button>
+                </div>
+            </div>
+
+            <!-- Grid -->
+            <div class="masonry-grid">
+                {% for photo in photos %}
+                <div class="photo-card">
+                    <!-- Context Menu -->
+                    <div class="card-options" data-tooltip="Options">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">more_horiz</span>
+                    </div>
+
+                    {% if photo.video %}
+                        <video src="{{ photo.video.url }}" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>
+                        <div class="media-badge"><span class="material-symbols-outlined">play_circle</span> 0:15</div>
+                    {% else %}
+                        <img src="{{ photo.image.url }}" alt="{{ photo.title }}">
+                    {% endif %}
+
+                    <div class="card-footer">
+                        <div class="card-title">{{ photo.title|truncatechars:20 }}</div>
+                        <div class="card-stats">
+                            <div class="stat-pill" style="color: #ff2a5f;"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span> 124</div>
+                            <div class="stat-pill" style="color: #fff;"><span class="material-symbols-outlined">visibility</span> 4.2k</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Mobile App Bottom Navigation -->
+    <nav class="mobile-nav">
+        <a href="#" class="nav-item"><span class="material-symbols-outlined">home</span><span>Home</span></a>
+        <a href="#" class="nav-item"><span class="material-symbols-outlined">search</span><span>Discover</span></a>
+        <a href="#" class="nav-item" style="color: white; margin-top: -16px;">
+            <div style="background: var(--text-primary); color: var(--bg-body); width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(255,255,255,0.2);">
+                <span class="material-symbols-outlined">add</span>
+            </div>
+        </a>
+        <a href="#" class="nav-item"><span class="material-symbols-outlined">notifications</span><span>Alerts</span></a>
+        <a href="#" class="nav-item active"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span><span>Profile</span></a>
+    </nav>
+
+</body>
+</html>
