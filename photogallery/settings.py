@@ -27,6 +27,9 @@ SECRET_KEY = 'django-insecure-pe6sc#vvzhap&q4a=a!4=np#&1yj4v9^h2h)bb87bc$=^#d2=2
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    "https://clubbs.onrender.com",
+]
 
 
 # Application definition
