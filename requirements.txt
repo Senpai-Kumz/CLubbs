@@ -8,3 +8,9 @@ sqlparse==0.5.5
 tzdata==2025.3
 channels[daphne]==4.3.2
 channels_redis==4.3.0
+python-dotenv==1.2.4
+psycopg[binary]==3.3.6
+django-cloudinary-storage==0.3.0
+python-magic==0.4.27
+cloudinary==1.46.3
+whitenoise==6.12.0

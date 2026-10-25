@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from gallery.storage import get_video_storage
 
 # 1. USER IDENTITY
 class Profile(models.Model):
@@ -27,7 +28,12 @@ class Photo(models.Model):
     uploader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploads')
     # ADD blank=True, null=True to the image field
     image = models.ImageField(upload_to='photos/', blank=True, null=True) 
-    video = models.FileField(upload_to='videos/', blank=True, null=True)
+    video = models.FileField(
+        upload_to='videos/',
+        storage=get_video_storage,
+        blank=True,
+        null=True,
+    )
     # ... keep the rest of the fields exactly the same
     title = models.CharField(max_length=200, blank=True)
     description = models.TextField(blank=True)

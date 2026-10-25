@@ -1,7 +1,25 @@
+# Python
 venv/
+.venv/
 __pycache__/
-*.pyc
-db.sqlite3
+*.py[cod]
+
+# Local environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Local databases and uploaded media
+*.sqlite3
 media/
 staticfiles/
-.env
+
+# Local editor / operating system files
+.vscode/
+.DS_Store
+Thumbs.db
+
+gallery/test_cloudinary.py
+
+# Untracked sample assets
+/photos/
